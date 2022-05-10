@@ -5,3 +5,4 @@ apicredentials.txt
 secret
 chainlink_debug.log
 test-node-jobs
+.DS_Store
