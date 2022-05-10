@@ -1,0 +1,7 @@
+database.env
+.env
+password.txt
+apicredentials.txt
+secret
+chainlink_debug.log
+test-node-jobs
