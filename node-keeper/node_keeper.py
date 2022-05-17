@@ -18,6 +18,7 @@ import toml
 import requests
 import dotenv
 
+
 def create_node_job(job_spec_file, method="api", session=None):
     """
     Creates a new job on the oracle node. Needs unique job name, id & oracle address in job spec.
@@ -28,44 +29,44 @@ def create_node_job(job_spec_file, method="api", session=None):
     Returns:
         requests object or api error response.
     """
-    node_url = getenv("NODE_URL") + ":" + getenv("NODE_PORT")
+    node_url = getenv("NODE_URL")
+    if len(getenv("NODE_PORT")) > 0:
+        node_url += ":" + getenv("NODE_PORT")
     job_create_err = None
     job_create_out = None
     node_session = session
     if method == "api":
         job_spec_text = ""
-        with open(job_spec_file, ) as f:
+        with open(
+            job_spec_file,
+        ) as f:
             job_spec_text = f.read()
         query_url = node_url + "/query"
         query_dict = {
             "operationName": "CreateJob",
-            "variables": {
-                "input": {
-                    "TOML": job_spec_text
-                }
-            },
+            "variables": {"input": {"TOML": job_spec_text}},
             "query": "mutation CreateJob($input: CreateJobInput!) {"
-                     "\n  createJob(input: $input) {"
-                     "\n    ... on CreateJobSuccess {"
-                     "\n      job {"
-                     "\n        id"
-                     "\n        __typename"
-                     "\n      }"
-                     "\n      __typename"
-                     "\n    }"
-                     "\n    ... on InputErrors {"
-                     "\n      errors {"
-                     "\n        path"
-                     "\n        message"
-                     "\n        code"
-                     "\n        __typename"
-                     "\n      }"
-                     "\n      __typename"
-                     "\n    }"
-                     "\n    __typename"
-                     "\n  }"
-                     "\n}"
-                     "\n"
+            "\n  createJob(input: $input) {"
+            "\n    ... on CreateJobSuccess {"
+            "\n      job {"
+            "\n        id"
+            "\n        __typename"
+            "\n      }"
+            "\n      __typename"
+            "\n    }"
+            "\n    ... on InputErrors {"
+            "\n      errors {"
+            "\n        path"
+            "\n        message"
+            "\n        code"
+            "\n        __typename"
+            "\n      }"
+            "\n      __typename"
+            "\n    }"
+            "\n    __typename"
+            "\n  }"
+            "\n}"
+            "\n",
         }
         req_ret = node_session.post(query_url, json.dumps(query_dict))
 
@@ -88,50 +89,49 @@ def get_node_jobs(method="api", session=None):
     Returns:
         A list of jobs and an api error response if aplicable.
     """
-    node_url = getenv("NODE_URL") + ":" + getenv("NODE_PORT")
+    node_url = getenv("NODE_URL")
+    if len(getenv("NODE_PORT")) > 0:
+        node_url += ":" + getenv("NODE_PORT")
     job_list_err = None
     job_list_out = None
     node_session = session
 
     if method == "api":
-        query_url = node_url+"/query"
+        query_url = node_url + "/query"
         query_dict = {
             "operationName": "FetchJobs",
-            "variables": {
-                "offset": 0,
-                "limit": 1000
-            },
+            "variables": {"offset": 0, "limit": 1000},
             "query": "fragment JobsPayload_ResultsFields on Job {"
-                     "\n  id"
-                     "\n  name"
-                     "\n  externalJobID"
-                     "\n  createdAt"
-                     "\n  spec {"
-                     "\n    __typename"
-                     "\n    ... on OCRSpec {"
-                     "\n      contractAddress"
-                     "\n      keyBundleID"
-                     "\n      transmitterAddress"
-                     "\n      __typename"
-                     "\n    }"
-                     "\n  }"
-                     "\n  __typename"
-                     "\n}"
-                     "\n"
-                     "\nquery FetchJobs($offset: Int, $limit: Int) {"
-                     "\n  jobs(offset: $offset, limit: $limit) {"
-                     "\n    results {"
-                     "\n      ...JobsPayload_ResultsFields"
-                     "\n      __typename"
-                     "\n    }"
-                     "\n    metadata {"
-                     "\n      total"
-                     "\n      __typename"
-                     "\n    }"
-                     "\n    __typename"
-                     "\n  }"
-                     "\n}"
-                     "\n"
+            "\n  id"
+            "\n  name"
+            "\n  externalJobID"
+            "\n  createdAt"
+            "\n  spec {"
+            "\n    __typename"
+            "\n    ... on OCRSpec {"
+            "\n      contractAddress"
+            "\n      keyBundleID"
+            "\n      transmitterAddress"
+            "\n      __typename"
+            "\n    }"
+            "\n  }"
+            "\n  __typename"
+            "\n}"
+            "\n"
+            "\nquery FetchJobs($offset: Int, $limit: Int) {"
+            "\n  jobs(offset: $offset, limit: $limit) {"
+            "\n    results {"
+            "\n      ...JobsPayload_ResultsFields"
+            "\n      __typename"
+            "\n    }"
+            "\n    metadata {"
+            "\n      total"
+            "\n      __typename"
+            "\n    }"
+            "\n    __typename"
+            "\n  }"
+            "\n}"
+            "\n",
         }
         req_ret = node_session.post(query_url, json.dumps(query_dict))
 
@@ -140,9 +140,9 @@ def get_node_jobs(method="api", session=None):
         else:
             job_list_out = req_ret.json()["data"]["jobs"]["results"]
     else:
-        job_list_p = subprocess.Popen(["chainlink",
-                                       "--json", "jobs", "list"],
-                                      stdout=subprocess.PIPE)
+        job_list_p = subprocess.Popen(
+            ["chainlink", "--json", "jobs", "list"], stdout=subprocess.PIPE
+        )
         job_list_out, job_list_err = job_list_p.communicate()
         job_list_out = json.loads(job_list_out)
 
@@ -159,29 +159,31 @@ def get_node_wallets(method="api", session=None):
         A list of wallet addresses registered on the oracle node and
          an api error response if applicable.
     """
-    node_url = getenv("NODE_URL") + ":" + getenv("NODE_PORT")
+    node_url = getenv("NODE_URL")
+    if len(getenv("NODE_PORT")) > 0:
+        node_url += ":" + getenv("NODE_PORT")
     key_list_err = None
     key_list_out = None
     node_session = session
 
     if method == "api":
-        query_url = node_url+"/query"
+        query_url = node_url + "/query"
         query_dict = {
             "operationName": "FetchETHKeys",
             "variables": {},
             "query": "fragment ETHKeysPayload_ResultsFields on EthKey {\n  "
-                     "address\n  "
-                     "chain {\n    "
-                     "id\n    __typename\n  }\n  "
-                     "createdAt\n  "
-                     "ethBalance\n  "
-                     "isFunding\n  "
-                     "linkBalance\n  __typename\n}"
-                     "\n\nquery FetchETHKeys {\n  "
-                     "ethKeys {\n    "
-                     "results {\n"
-                     "      ...ETHKeysPayload_ResultsFields\n      __typename\n    }\n"
-                     "    __typename\n  }\n}\n"
+            "address\n  "
+            "chain {\n    "
+            "id\n    __typename\n  }\n  "
+            "createdAt\n  "
+            "ethBalance\n  "
+            "isFunding\n  "
+            "linkBalance\n  __typename\n}"
+            "\n\nquery FetchETHKeys {\n  "
+            "ethKeys {\n    "
+            "results {\n"
+            "      ...ETHKeysPayload_ResultsFields\n      __typename\n    }\n"
+            "    __typename\n  }\n}\n",
         }
         req_ret = node_session.post(query_url, json.dumps(query_dict))
 
@@ -190,9 +192,9 @@ def get_node_wallets(method="api", session=None):
         else:
             key_list_out = req_ret.json()["data"]["ethKeys"]["results"]
     else:
-        key_list_p = subprocess.Popen(["chainlink",
-                                       "--json", "keys", "eth", "list"],
-                                      stdout=subprocess.PIPE)
+        key_list_p = subprocess.Popen(
+            ["chainlink", "--json", "keys", "eth", "list"], stdout=subprocess.PIPE
+        )
         key_list_out, key_list_err = key_list_p.communicate()
         key_list_out = json.loads(key_list_out)
     return key_list_err, key_list_out
@@ -209,13 +211,14 @@ def node_login(method="api"):
 
     node_userid = getenv("NODE_USERID")
     node_userpw = getenv("NODE_USERPW")
-    node_url = getenv("NODE_URL")+":"+getenv("NODE_PORT")
+    node_url = getenv("NODE_URL")
+    if len(getenv("NODE_PORT")) > 0:
+        node_url += ":" + getenv("NODE_PORT")
     session = requests.Session()
     auth_err = None
     if method == "api":
-        login_url = node_url+"/sessions"
-        node_auth_params = {"email": node_userid,
-                            "password": node_userpw}
+        login_url = node_url + "/sessions"
+        node_auth_params = {"email": node_userid, "password": node_userpw}
         req_ret = session.post(login_url, json.dumps(node_auth_params))
         if req_ret.text.lower().find("error") > 0:
             auth_err = "ERROR - Login error: " + str(req_ret.text)
@@ -225,7 +228,9 @@ def node_login(method="api"):
         with open("credentials.txt", "utf-8") as file:
             file.write(node_userid + "\n" + node_userpw)
         # Ensure chainlink is in path (~/go/bin has been loaded to path)
-        auth_p = subprocess.Popen(["chainlink", "admin", "login", "-f", "credentials.txt"])
+        auth_p = subprocess.Popen(
+            ["chainlink", "admin", "login", "-f", "credentials.txt"]
+        )
         auth_out, auth_err = auth_p.communicate()
         os.system("rm  credentials.txt")
     return auth_err, session
