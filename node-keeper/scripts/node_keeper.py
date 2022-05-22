@@ -1,31 +1,47 @@
 """
-    Creates a new job on the oracle node. Requires unique job name, id & oracle address in job spe.
+    Creates a new job on the oracle node.
+    Requires unique job name, id & oracle address in job spe.
+
     Args:
         job_spec_file (string): Fully qualified path to TOML file.
-        method (string): Oracle query method. Default "api" anything else attempts ChainLink CLI.
-        session (requests.Session()): Authenticated HTTP session. Can be obtained from login().
+
+        method (string): Oracle query method.
+         Default "api" anything else attempts ChainLink CLI.
+
+        session (requests.Session()): Authenticated HTTP session.
+         Can be obtained from login().
+
     Returns:
         None or api error response.
 """
 import os
 import subprocess
 from os import getenv
-import uuid
-import hashlib
-import time
 import json
-import toml
 import requests
-import dotenv
+from dotenv import load_dotenv
+
+# import uuid
+# import hashlib
+# import time
+# import toml
+
+load_dotenv
 
 
 def create_node_job(job_spec_file, method="api", session=None):
     """
-    Creates a new job on the oracle node. Needs unique job name, id & oracle address in job spec.
+    Creates a new job on the oracle node.
+    Needs unique job name, id & oracle address in job spec.
+
     Args:
         job_spec_file (string): Fully qualified path to TOML file.
-        method (string): Oracle query method. Default "api" anything else attempts ChainLink CLI.
-        session (requests.Session): Authenticated HTTP session. Can be obtained from login().
+        method (string): Oracle query method.
+         Default "api" anything else attempts ChainLink CLI.
+
+        session (requests.Session): Authenticated HTTP session.
+         Can be obtained from login().
+
     Returns:
         requests object or api error response.
     """
@@ -83,9 +99,14 @@ def create_node_job(job_spec_file, method="api", session=None):
 def get_node_jobs(method="api", session=None):
     """
     Retrieves list of existing jobs on the oracle node.
+
     Args:
-        method (string): Oracle query method. Default "api" anything else attempts ChainLink CLI
-        session (requests.Session()): Authenticated HTTP session. Can be obtained from login()
+        method (string): Oracle query method.
+         Default "api" anything else attempts ChainLink CLI
+
+        session (requests.Session()): Authenticated HTTP session.
+         Can be obtained from login()
+
     Returns:
         A list of jobs and an api error response if aplicable.
     """
@@ -152,9 +173,14 @@ def get_node_jobs(method="api", session=None):
 def get_node_wallets(method="api", session=None):
     """
     Retrieves list of wallet addresses on the oracle node.
+
     Args:
-        method (string): Oracle query method. Default "api" anything else attempts ChainLink CLI
-        session (requests.Session()): Authenticated HTTP session. Can be obtained from login()
+        method (string): Oracle query method.
+         Default "api" anything else attempts ChainLink CLI
+
+        session (requests.Session()): Authenticated HTTP session.
+         Can be obtained from login()
+
     Returns:
         A list of wallet addresses registered on the oracle node and
          an api error response if applicable.
@@ -204,9 +230,11 @@ def node_login(method="api"):
     """
     Authenticates a user with login credentials against the oracle node
     Args:
-        method (string): Oracle query method. Default "api" anything else attempts ChainLink CLI
+        method (string): Oracle query method.
+         Default "api" anything else attempts ChainLink CLI
     Returns:
-        requests.Session() with an authenticated HTTP session and any applicable error string
+        requests.Session() with an authenticated HTTP session
+         and any applicable error string
     """
 
     node_userid = getenv("NODE_USERID")
@@ -224,7 +252,8 @@ def node_login(method="api"):
             auth_err = "ERROR - Login error: " + str(req_ret.text)
 
     else:
-        # Write to temp file and remove after read. chainlink command does not allow pw piping
+        # Write to temp file and remove after read.
+        # chainlink command does not allow pw piping
         with open("credentials.txt", "utf-8") as file:
             file.write(node_userid + "\n" + node_userpw)
         # Ensure chainlink is in path (~/go/bin has been loaded to path)
